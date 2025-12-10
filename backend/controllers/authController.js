@@ -1,12 +1,11 @@
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
 
 const generateToken = (userId, userRole) => {
-  return jwt.sign(
-    { id: userId, role: userRole },
-    process.env.JWT_SECRET,
-    { expiresIn: "7d" }
-  );
+  return jwt.sign({ id: userId, role: userRole }, process.env.JWT_SECRET, {
+    expiresIn: "7d",
+  });
 };
 
 export const register = async (req, res) => {
@@ -18,9 +17,11 @@ export const register = async (req, res) => {
       return res.status(400).json({ error: "User already exists" });
     }
 
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const user = new User({
       email,
-      password,
+      password: hashedPassword,
       role: role || "driver",
       name,
     });
@@ -44,7 +45,6 @@ export const register = async (req, res) => {
   }
 };
 
-
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -54,7 +54,7 @@ export const login = async (req, res) => {
       return res.status(400).json({ error: "Invalid credentials" });
     }
 
-    const isMatch = await user.comparePassword(password);
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ error: "Invalid credentials" });
     }
@@ -75,3 +75,5 @@ export const login = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+
