@@ -82,3 +82,29 @@ export const deleteTrip = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+export const getAllTrips = async (req, res) => {
+  try {
+    const { statut, chauffeur, dateDepart } = req.query;
+    const filter = {};
+    if (statut) filter.statut = statut;
+    if (chauffeur) filter.chauffeur = chauffeur;
+    if (dateDepart) {
+      const startDate = new Date(dateDepart);
+      const endDate = new Date(dateDepart);
+      endDate.setDate(endDate.getDate() + 1);
+      filter.dateDepart = { $gte: startDate, $lt: endDate };
+    }
+    const trips = await Trip.find(filter)
+      .populate("chauffeur", "name email")
+      .populate("camion", "immatriculation modele")
+      .populate("remorque", "immatriculation type")
+      .sort({ dateDepart: -1 });
+    res.json({
+      count: trips.length,
+      trips,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
