@@ -64,3 +64,19 @@ export const deleteTruck = async (req, res) => {
   }
 };
 
+export const getAllTrucks = async (req, res) => {
+  try {
+    const { statut } = req.query;
+    
+    const filter = {};
+    if (statut) filter.statut = statut;
+    const trucks = await Truck.find(filter).sort({ createdAt: -1 });
+    res.json({
+      count: trucks.length,
+      trucks,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
