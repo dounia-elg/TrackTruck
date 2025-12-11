@@ -84,62 +84,62 @@ export const deleteTrip = async (req, res) => {
 };
 
 export const getAllTrips = async (req, res) => {
-  try {
-    const { statut, chauffeur, dateDepart } = req.query;
-    const filter = {};
-    if (statut) filter.statut = statut;
-    if (chauffeur) filter.chauffeur = chauffeur;
-    if (dateDepart) {
-      const startDate = new Date(dateDepart);
-      const endDate = new Date(dateDepart);
-      endDate.setDate(endDate.getDate() + 1);
-      filter.dateDepart = { $gte: startDate, $lt: endDate };
+    try {
+        const { statut, chauffeur, dateDepart } = req.query;
+        const filter = {};
+        if (statut) filter.statut = statut;
+        if (chauffeur) filter.chauffeur = chauffeur;
+        if (dateDepart) {
+            const startDate = new Date(dateDepart);
+            const endDate = new Date(dateDepart);
+            endDate.setDate(endDate.getDate() + 1);
+            filter.dateDepart = { $gte: startDate, $lt: endDate };
+        }
+        const trips = await Trip.find(filter)
+            .populate("chauffeur", "name email")
+            .populate("camion", "immatriculation modele")
+            .populate("remorque", "immatriculation type")
+            .sort({ dateDepart: -1 });
+        res.json({
+            count: trips.length,
+            trips,
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
-    const trips = await Trip.find(filter)
-      .populate("chauffeur", "name email")
-      .populate("camion", "immatriculation modele")
-      .populate("remorque", "immatriculation type")
-      .sort({ dateDepart: -1 });
-    res.json({
-      count: trips.length,
-      trips,
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
 };
 
 export const updateTripStatus = async (req, res) => {
-  try {
-    const { statut, kilometrageDepart, kilometrageArrivee, consommationCarburant, remarques } = req.body;
-    const trip = await Trip.findById(req.params.id);
-    if (!trip) {
-      return res.status(404).json({ error: "Trajet non trouvé" });
+    try {
+        const { statut, kilometrageDepart, kilometrageArrivee, consommationCarburant, remarques } = req.body;
+        const trip = await Trip.findById(req.params.id);
+        if (!trip) {
+            return res.status(404).json({ error: "Trajet non trouvé" });
+        }
+
+        if (req.user.role === "driver" && trip.chauffeur.toString() !== req.user.id) {
+            return res.status(403).json({ error: "Accès non autorisé" });
+        }
+
+        if (statut) trip.statut = statut;
+        if (kilometrageDepart !== undefined) trip.kilometrageDepart = kilometrageDepart;
+        if (kilometrageArrivee !== undefined) trip.kilometrageArrivee = kilometrageArrivee;
+        if (consommationCarburant !== undefined) trip.consommationCarburant = consommationCarburant;
+        if (remarques !== undefined) trip.remarques = remarques;
+
+        if (trip.kilometrageDepart && trip.kilometrageArrivee) {
+            trip.distanceParcourue = trip.kilometrageArrivee - trip.kilometrageDepart;
+        }
+        await trip.save();
+        const updatedTrip = await Trip.findById(trip._id)
+            .populate("chauffeur", "name email")
+            .populate("camion", "immatriculation modele")
+            .populate("remorque", "immatriculation type");
+        res.json({
+            message: "Statut du trajet mis à jour",
+            trip: updatedTrip,
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
-   
-    if (req.user.role === "driver" && trip.chauffeur.toString() !== req.user.id) {
-      return res.status(403).json({ error: "Accès non autorisé" });
-    }
-    
-    if (statut) trip.statut = statut;
-    if (kilometrageDepart !== undefined) trip.kilometrageDepart = kilometrageDepart;
-    if (kilometrageArrivee !== undefined) trip.kilometrageArrivee = kilometrageArrivee;
-    if (consommationCarburant !== undefined) trip.consommationCarburant = consommationCarburant;
-    if (remarques !== undefined) trip.remarques = remarques;
-    
-    if (trip.kilometrageDepart && trip.kilometrageArrivee) {
-      trip.distanceParcourue = trip.kilometrageArrivee - trip.kilometrageDepart;
-    }
-    await trip.save();
-    const updatedTrip = await Trip.findById(trip._id)
-      .populate("chauffeur", "name email")
-      .populate("camion", "immatriculation modele")
-      .populate("remorque", "immatriculation type");
-    res.json({
-      message: "Statut du trajet mis à jour",
-      trip: updatedTrip,
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
 };
