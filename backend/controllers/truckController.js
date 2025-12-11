@@ -49,3 +49,18 @@ export const updateTruck = async (req, res) => {
   }
 };
 
+export const deleteTruck = async (req, res) => {
+  try {
+    const truck = await Truck.findByIdAndDelete(req.params.id);
+    if (!truck) {
+      return res.status(404).json({ error: "Camion non trouvé" });
+    }
+    res.json({
+      message: "Camion supprimé avec succès",
+      truck,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
