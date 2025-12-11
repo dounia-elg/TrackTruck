@@ -23,3 +23,29 @@ export const createTruck = async (req, res) => {
   }
 };
 
+export const updateTruck = async (req, res) => {
+  try {
+    const { immatriculation, modele, capaciteCarburant, kilometrage, statut } = req.body;
+    const truck = await Truck.findByIdAndUpdate(
+      req.params.id,
+      {
+        immatriculation,
+        modele,
+        capaciteCarburant,
+        kilometrage,
+        statut,
+      },
+      { new: true, runValidators: true }
+    );
+    if (!truck) {
+      return res.status(404).json({ error: "Camion non trouvé" });
+    }
+    res.json({
+      message: "Camion mis à jour avec succès",
+      truck,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
