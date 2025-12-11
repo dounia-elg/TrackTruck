@@ -45,3 +45,25 @@ export const createTrip = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+export const updateTrip = async (req, res) => {
+    try {
+        const trip = await Trip.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true, runValidators: true }
+        )
+            .populate("chauffeur", "name email")
+            .populate("camion", "immatriculation modele")
+            .populate("remorque", "immatriculation type");
+        if (!trip) {
+            return res.status(404).json({ error: "Trajet non trouvé" });
+        }
+        res.json({
+            message: "Trajet mis à jour avec succès",
+            trip,
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
