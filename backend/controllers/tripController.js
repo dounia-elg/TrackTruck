@@ -143,3 +143,18 @@ export const updateTripStatus = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+export const getMyTrips = async (req, res) => {
+    try {
+        const trips = await Trip.find({ chauffeur: req.user.id })
+            .populate("camion", "immatriculation modele")
+            .populate("remorque", "immatriculation type")
+            .sort({ dateDepart: -1 });
+        res.json({
+            count: trips.length,
+            trips,
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
