@@ -53,3 +53,21 @@ export const updateTire = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const deleteTire = async (req, res) => {
+  try {
+    const tire = await Tire.findByIdAndDelete(req.params.id);
+    if (!tire) {
+      return res.status(404).json({ error: "Pneu non trouvé" });
+    }
+    res.json({
+      message: "Pneu supprimé avec succès",
+      tire,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+
