@@ -69,5 +69,23 @@ export const deleteTire = async (req, res) => {
   }
 };
 
+export const getAllTires = async (req, res) => {
+  try {
+    const { camion, statut } = req.query;
+    const filter = {};
+    if (camion) filter.camion = camion;
+    if (statut) filter.statut = statut;
+    const tires = await Tire.find(filter)
+      .populate("camion", "immatriculation modele")
+      .sort({ createdAt: -1 });
+    res.json({
+      count: tires.length,
+      tires,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 
 
