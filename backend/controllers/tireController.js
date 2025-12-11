@@ -33,3 +33,23 @@ export const createTire = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const updateTire = async (req, res) => {
+  try {
+    const { usure, statut } = req.body;
+    const tire = await Tire.findByIdAndUpdate(
+      req.params.id,
+      { usure, statut },
+      { new: true, runValidators: true }
+    ).populate("camion", "immatriculation modele");
+    if (!tire) {
+      return res.status(404).json({ error: "Pneu non trouvé" });
+    }
+    res.json({
+      message: "Pneu mis à jour avec succès",
+      tire,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
