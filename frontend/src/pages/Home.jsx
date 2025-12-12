@@ -1,27 +1,32 @@
 import { Link } from 'react-router-dom';
+import { FaTruck, FaArrowRight } from 'react-icons/fa';
+import truckHero from '../assets/truckHero.jpg';
 
 function Home() {
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 to-amber-50">
+        <div className="min-h-screen bg-white">
             {/* Navigation */}
-            <nav className="bg-slate-800 shadow-lg">
+            <nav className="border-b border-gray-200 bg-white">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-16">
-                        <div className="flex items-center">
-                            <span className="text-2xl font-bold text-amber-400">🚛 TrackTruck</span>
+                    <div className="flex justify-between items-center h-20">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-black rounded-lg flex items-center justify-center">
+                                <FaTruck className="text-white text-lg" />
+                            </div>
+                            <span className="text-2xl font-bold text-black">TrackTruck</span>
                         </div>
-                        <div className="flex gap-4">
+                        <div className="flex gap-4 items-center">
                             <Link
                                 to="/login"
-                                className="px-4 py-2 text-amber-400 hover:text-amber-300 font-medium transition"
+                                className="px-5 py-2 text-gray-700 hover:text-black font-medium transition"
                             >
-                                Se connecter
+                                Connexion
                             </Link>
                             <Link
                                 to="/register"
-                                className="px-6 py-2 bg-amber-500 text-slate-900 rounded-lg hover:bg-amber-400 transition font-medium"
+                                className="px-6 py-2.5 bg-black text-white rounded-lg hover:bg-gray-800 transition font-medium"
                             >
-                                S'inscrire
+                                Commencer
                             </Link>
                         </div>
                     </div>
@@ -29,41 +34,39 @@ function Home() {
             </nav>
 
             {/* Hero Section */}
-            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-                <div className="grid md:grid-cols-2 gap-12 items-center">
+            <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+                <div className="grid md:grid-cols-2 gap-16 items-center">
                     <div>
-                        <h1 className="text-5xl font-bold text-slate-900 mb-6 leading-tight">
-                            Gérez votre flotte de camions en toute simplicité
+                        <h1 className="text-6xl font-black text-black mb-6 leading-tight">
+                            Gérez votre flotte simplement
                         </h1>
-                        <p className="text-xl text-slate-600 mb-8 leading-relaxed">
-                            TrackTruck vous aide à suivre vos véhicules, trajets, maintenance et chauffeurs en temps réel.
+                        <p className="text-xl text-gray-600 mb-10 leading-relaxed">
+                            Suivez vos camions, gérez vos trajets et optimisez votre maintenance en temps réel.
                         </p>
-                        <div className="flex gap-4">
+                        <div className="flex flex-col sm:flex-row gap-4">
                             <Link
                                 to="/register"
-                                className="px-8 py-3 bg-emerald-700 text-white rounded-lg hover:bg-emerald-600 transition text-lg font-medium shadow-lg"
+                                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-black text-white rounded-lg hover:bg-gray-800 transition text-lg font-semibold"
                             >
-                                Commencer gratuitement
+                                Essai gratuit <FaArrowRight className="text-sm" />
                             </Link>
                             <Link
                                 to="/login"
-                                className="px-8 py-3 bg-white border-2 border-slate-700 text-slate-700 rounded-lg hover:bg-slate-50 transition text-lg font-medium"
+                                className="px-8 py-4 bg-white border-2 border-black text-black rounded-lg hover:bg-gray-50 transition text-lg font-medium text-center"
                             >
-                                Connexion
+                                Se connecter
                             </Link>
                         </div>
                     </div>
                     <div>
                         <img
-                            src="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=600&h=400&fit=crop"
-                            alt="Camion sur la route"
-                            className="rounded-2xl shadow-2xl border-4 border-slate-200"
+                            src={truckHero} 
+                            alt="Flotte de camions"
+                            className="rounded-2xl shadow-2xl w-full"
                         />
                     </div>
                 </div>
-            </section>
-
-
+            </section>          
         </div>
     );
 }
