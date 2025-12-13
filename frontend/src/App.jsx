@@ -15,12 +15,17 @@ function App() {
 
 
         {/* Admin Routes */}
-        <Route path="/admin/dashboard" element={<ProtectedRoute allowedRole="admin" />}>
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        </Route>
+        <Route path="/admin/dashboard"
+          element={
+            <ProtectedRoute allowedRole="admin">
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
 
-    
-        
+
+
+
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </BrowserRouter>
