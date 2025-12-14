@@ -20,9 +20,9 @@ function Trips() {
         lieuArrivee: '',
         dateDepart: '',
         dateArrivee: '',
-        chauffeurAssigne: '',
-        camionAssigne: '',
-        remorqueAssignee: '',
+        chauffeur: '',
+        camion: '',
+        remorque: '',
         statut: 'planifié'
     });
 
@@ -135,9 +135,9 @@ function Trips() {
             lieuArrivee: trip.lieuArrivee,
             dateDepart: trip.dateDepart?.split('T')[0] || '',
             dateArrivee: trip.dateArrivee?.split('T')[0] || '',
-            chauffeurAssigne: trip.chauffeurAssigne?._id || '',
-            camionAssigne: trip.camionAssigne?._id || '',
-            remorqueAssignee: trip.remorqueAssignee?._id || '',
+            chauffeur: trip.chauffeur?._id || '',
+            camion: trip.camion?._id || '',
+            remorque: trip.remorque?._id || '',
             statut: trip.statut
         });
         setShowForm(true);
@@ -149,9 +149,9 @@ function Trips() {
             lieuArrivee: '',
             dateDepart: '',
             dateArrivee: '',
-            chauffeurAssigne: '',
-            camionAssigne: '',
-            remorqueAssignee: '',
+            chauffeur: '',
+            camion: '',
+            remorque: '',
             statut: 'planifié'
         });
         setEditingTrip(null);
@@ -248,8 +248,8 @@ function Trips() {
                                     <div>
                                         <label className="block text-sm font-medium mb-1">Chauffeur assigné</label>
                                         <select
-                                            name="chauffeurAssigne"
-                                            value={formData.chauffeurAssigne}
+                                            name="chauffeur"
+                                            value={formData.chauffeur}
                                             onChange={handleChange}
                                             required
                                             className="w-full px-3 py-2 border border-gray-300 rounded-lg"
@@ -266,8 +266,8 @@ function Trips() {
                                     <div>
                                         <label className="block text-sm font-medium mb-1">Camion assigné</label>
                                         <select
-                                            name="camionAssigne"
-                                            value={formData.camionAssigne}
+                                            name="camion"
+                                            value={formData.camion}
                                             onChange={handleChange}
                                             required
                                             className="w-full px-3 py-2 border border-gray-300 rounded-lg"
@@ -284,8 +284,8 @@ function Trips() {
                                     <div>
                                         <label className="block text-sm font-medium mb-1">Remorque (optionnel)</label>
                                         <select
-                                            name="remorqueAssignee"
-                                            value={formData.remorqueAssignee}
+                                            name="remorque"
+                                            value={formData.remorque}
                                             onChange={handleChange}
                                             className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                                         >
@@ -341,6 +341,7 @@ function Trips() {
                                         <th className="px-6 py-3 text-left text-sm font-semibold text-white">Date départ</th>
                                         <th className="px-6 py-3 text-left text-sm font-semibold text-white">Chauffeur</th>
                                         <th className="px-6 py-3 text-left text-sm font-semibold text-white">Camion</th>
+                                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">Remorque</th>
                                         <th className="px-6 py-3 text-left text-sm font-semibold text-white">Statut</th>
                                         <th className="px-6 py-3 text-left text-sm font-semibold text-white">Actions</th>
                                     </tr>
@@ -351,8 +352,9 @@ function Trips() {
                                             <td className="px-6 py-4 font-medium">{trip.lieuDepart}</td>
                                             <td className="px-6 py-4">{trip.lieuArrivee}</td>
                                             <td className="px-6 py-4">{new Date(trip.dateDepart).toLocaleDateString()}</td>
-                                            <td className="px-6 py-4">{trip.chauffeurAssigne?.name || 'N/A'}</td>
-                                            <td className="px-6 py-4">{trip.camionAssigne?.immatriculation || 'N/A'}</td>
+                                            <td className="px-6 py-4">{trip.chauffeur?.name}</td>
+                                            <td className="px-6 py-4">{trip.camion?.immatriculation}</td>
+                                            <td className="px-6 py-4">{trip.remorque?.immatriculation}</td>
                                             <td className="px-6 py-4">
                                                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                                                     trip.statut === 'planifié' ? 'bg-blue-100 text-blue-800' :
