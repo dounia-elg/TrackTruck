@@ -65,7 +65,7 @@ function Trucks() {
             await axios.put(`http://localhost:3001/api/trucks/${editingTruck._id}`, formData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            fetchTrucks(); // Refresh list
+            fetchTrucks(); 
             resetForm();
             alert('Camion modifié avec succès!');
         } catch (error) {
@@ -79,7 +79,7 @@ function Trucks() {
                 await axios.delete(`http://localhost:3001/api/trucks/${id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                fetchTrucks(); // Refresh list
+                fetchTrucks(); 
                 alert('Camion supprimé!');
             } catch (error) {
                 alert('Erreur: ' + (error.response?.data?.error || 'Erreur inconnue'));
@@ -231,14 +231,14 @@ function Trucks() {
                     ) : (
                         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
                             <table className="w-full">
-                                <thead className="bg-gray-50 border-b border-gray-200">
+                                <thead className="bg-gray-700 border-b">
                                     <tr>
-                                        <th className="px-6 py-3 text-left text-sm font-semibold">Immatriculation</th>
-                                        <th className="px-6 py-3 text-left text-sm font-semibold">Modèle</th>
-                                        <th className="px-6 py-3 text-left text-sm font-semibold">Carburant (L)</th>
-                                        <th className="px-6 py-3 text-left text-sm font-semibold">Kilométrage</th>
-                                        <th className="px-6 py-3 text-left text-sm font-semibold">Statut</th>
-                                        <th className="px-6 py-3 text-left text-sm font-semibold">Actions</th>
+                                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">Immatriculation</th>
+                                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">Modèle</th>
+                                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">Carburant (L)</th>
+                                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">Kilométrage</th>
+                                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">Statut</th>
+                                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
