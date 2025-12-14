@@ -158,7 +158,229 @@ function Trips() {
         setShowForm(false);
     };
 
-    
+    return (
+        <div className="flex h-screen bg-gray-50">
+
+            {/* SIDEBAR */}
+            <AdminSidebar activePage="trips" />
+
+            {/* MAIN CONTENT */}
+            <div className="flex-1 flex flex-col">
+
+                {/* Header */}
+                <header className="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
+                    <h1 className="text-2xl font-black text-black">Gestion des Trajets</h1>
+                    <button
+                        onClick={() => setShowForm(true)}
+                        className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800"
+                    >
+                        <FaPlus /> Créer un trajet
+                    </button>
+                </header>
+
+                {/* Content */}
+                <main className="flex-1 overflow-y-auto p-6">
+
+                    {/* Form Modal */}
+                    {showForm && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                            <div className="bg-white rounded-xl p-6 w-full max-w-2xl max-h-screen overflow-y-auto">
+                                <h2 className="text-2xl font-bold mb-4">
+                                    {editingTrip ? 'Modifier le trajet' : 'Créer un trajet'}
+                                </h2>
+
+                                <form onSubmit={editingTrip ? handleUpdate : handleAdd} className="space-y-4">
+                                    
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1">Lieu de départ</label>
+                                            <input
+                                                type="text"
+                                                name="lieuDepart"
+                                                value={formData.lieuDepart}
+                                                onChange={handleChange}
+                                                required
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                                placeholder="Casablanca"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1">Lieu d'arrivée</label>
+                                            <input
+                                                type="text"
+                                                name="lieuArrivee"
+                                                value={formData.lieuArrivee}
+                                                onChange={handleChange}
+                                                required
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                                placeholder="Rabat"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1">Date de départ</label>
+                                            <input
+                                                type="date"
+                                                name="dateDepart"
+                                                value={formData.dateDepart}
+                                                onChange={handleChange}
+                                                required
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium mb-1">Date d'arrivée</label>
+                                            <input
+                                                type="date"
+                                                name="dateArrivee"
+                                                value={formData.dateArrivee}
+                                                onChange={handleChange}
+                                                required
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Chauffeur assigné</label>
+                                        <select
+                                            name="chauffeurAssigne"
+                                            value={formData.chauffeurAssigne}
+                                            onChange={handleChange}
+                                            required
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                        >
+                                            <option value="">-- Sélectionner un chauffeur --</option>
+                                            {drivers.map(driver => (
+                                                <option key={driver._id} value={driver._id}>
+                                                    {driver.name} ({driver.email})
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Camion assigné</label>
+                                        <select
+                                            name="camionAssigne"
+                                            value={formData.camionAssigne}
+                                            onChange={handleChange}
+                                            required
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                        >
+                                            <option value="">-- Sélectionner un camion --</option>
+                                            {trucks.map(truck => (
+                                                <option key={truck._id} value={truck._id}>
+                                                    {truck.immatriculation} - {truck.modele}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Remorque (optionnel)</label>
+                                        <select
+                                            name="remorqueAssignee"
+                                            value={formData.remorqueAssignee}
+                                            onChange={handleChange}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                        >
+                                            <option value="">-- Aucune remorque --</option>
+                                            {trailers.map(trailer => (
+                                                <option key={trailer._id} value={trailer._id}>
+                                                    {trailer.immatriculation} - {trailer.type}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">Statut</label>
+                                        <select
+                                            name="statut"
+                                            value={formData.statut}
+                                            onChange={handleChange}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                        >
+                                            <option value="planifié">Planifié</option>
+                                            <option value="en cours">En cours</option>
+                                            <option value="terminé">Terminé</option>
+                                            <option value="annulé">Annulé</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="flex gap-3">
+                                        <button type="submit" className="flex-1 bg-black text-white py-2 rounded-lg hover:bg-gray-800">
+                                            {editingTrip ? 'Modifier' : 'Créer'}
+                                        </button>
+                                        <button type="button" onClick={resetForm} className="flex-1 bg-gray-200 text-black py-2 rounded-lg hover:bg-gray-300">
+                                            Annuler
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Trips Table */}
+                    {loading ? (
+                        <p className="text-center py-12 text-gray-500">Chargement...</p>
+                    ) : trips.length === 0 ? (
+                        <p className="text-center py-12 text-gray-500">Aucun trajet trouvé</p>
+                    ) : (
+                        <div className="bg-white rounded-xl border border-gray-200 overflow-x-auto">
+                            <table className="w-full">
+                                <thead className="bg-gray-700 border-b">
+                                    <tr>
+                                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">Départ</th>
+                                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">Arrivée</th>
+                                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">Date départ</th>
+                                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">Chauffeur</th>
+                                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">Camion</th>
+                                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">Statut</th>
+                                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {trips.map((trip) => (
+                                        <tr key={trip._id} className="border-b border-gray-200 hover:bg-gray-50">
+                                            <td className="px-6 py-4 font-medium">{trip.lieuDepart}</td>
+                                            <td className="px-6 py-4">{trip.lieuArrivee}</td>
+                                            <td className="px-6 py-4">{new Date(trip.dateDepart).toLocaleDateString()}</td>
+                                            <td className="px-6 py-4">{trip.chauffeurAssigne?.name || 'N/A'}</td>
+                                            <td className="px-6 py-4">{trip.camionAssigne?.immatriculation || 'N/A'}</td>
+                                            <td className="px-6 py-4">
+                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                                    trip.statut === 'planifié' ? 'bg-blue-100 text-blue-800' :
+                                                    trip.statut === 'en cours' ? 'bg-yellow-100 text-yellow-800' :
+                                                    trip.statut === 'terminé' ? 'bg-green-100 text-green-800' :
+                                                    'bg-red-100 text-red-800'
+                                                }`}>
+                                                    {trip.statut}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <button onClick={() => startEdit(trip)} className="text-green-600 hover:text-green-800 mr-3">
+                                                    <FaEdit />
+                                                </button>
+                                                <button onClick={() => handleDelete(trip._id)} className="text-red-600 hover:text-red-800">
+                                                    <FaTrash />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </main>
+            </div>
+        </div>
+    );
 }
 
 export default Trips;
