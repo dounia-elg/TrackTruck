@@ -6,6 +6,7 @@ import AdminDashboard from './pages/admin/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import Trucks from './pages/admin/Trucks';
 import Trailers from './pages/admin/Trailers';
+import Trips from './pages/admin/Trips';
 
 function App() {
   return (
@@ -33,6 +34,12 @@ function App() {
         <Route path="/admin/trailers" element={
           <ProtectedRoute allowedRole="admin">
             <Trailers />
+          </ProtectedRoute>
+        }
+        />
+        <Route path="/admin/trips" element={
+          <ProtectedRoute allowedRole="admin">
+            <Trips />
           </ProtectedRoute>
         } 
         />
