@@ -1,5 +1,5 @@
 import express from "express";
-import { register, login } from "../controllers/authController.js";
+import { register, login, getDrivers } from "../controllers/authController.js";
 import { validateRegister, validateLogin } from "../validators/authValidator.js";
 import { validateRequest } from "../middleware/validateRequest.js";
 import { verifyToken } from "../middleware/verifyToken.js";
@@ -24,6 +24,9 @@ router.get("/driver-only", verifyToken, checkRole("driver"), (req, res) => {
     user: req.user 
   });
 });
+
+
+router.get('/drivers', verifyToken, checkRole('admin'), getDrivers);
 
 
 

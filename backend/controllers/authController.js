@@ -77,3 +77,16 @@ export const login = async (req, res) => {
 };
 
 
+export const getDrivers = async (req, res) => {
+  try {
+    const drivers = await User.find({ role: 'driver' }).select('name email');
+    res.json({
+      count: drivers.length,
+      drivers
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
