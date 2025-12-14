@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FaTruck, FaEdit, FaTrash, FaPlus, FaHome } from 'react-icons/fa';
+import { FaTruck, FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
+import AdminSidebar from '../../components/AdminSidebar';
 import axios from 'axios';
 
 function Trucks() {
@@ -114,22 +115,7 @@ function Trucks() {
         <div className="flex h-screen bg-gray-50">
 
             {/* SIDEBAR */}
-            <aside className="w-64 bg-black text-white flex flex-col">
-                <div className="p-6 border-b border-gray-800">
-                    <div className="flex items-center gap-3">
-                        <FaTruck className="text-2xl" />
-                        <span className="text-xl font-bold">TrackTruck</span>
-                    </div>
-                </div>
-                <nav className="flex-1 p-4">
-                    <Link to="/admin/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-800 transition mb-2">
-                        <FaHome /> Dashboard
-                    </Link>
-                    <Link to="/admin/trucks" className="flex items-center gap-3 px-4 py-3 rounded-lg bg-gray-800 text-white mb-2">
-                        <FaTruck /> Camions
-                    </Link>
-                </nav>
-            </aside>
+            <AdminSidebar activePage="trucks" />
 
             {/* MAIN CONTENT */}
             <div className="flex-1 flex flex-col">
