@@ -23,6 +23,10 @@ const truckSchema = new mongoose.Schema(
       default: 0,
       min: 0,
     },
+    prochainEntretien: { 
+      type: Number, 
+      default: 30000 
+    },
     statut: {
       type: String,
       enum: ["disponible", "en service", "en maintenance", "hors service"],
