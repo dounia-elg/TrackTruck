@@ -41,7 +41,7 @@ function App() {
           <ProtectedRoute allowedRole="admin">
             <Trips />
           </ProtectedRoute>
-        } 
+        }
         />
 
 
