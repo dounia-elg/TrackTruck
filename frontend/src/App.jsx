@@ -47,7 +47,7 @@ function App() {
 
         {/* Driver Routes */}
         <Route path="/driver/my-trips" element={
-          <ProtectedRoute role="driver">
+          <ProtectedRoute allowedRole="driver">
             <MyTrips />
           </ProtectedRoute>
         } />
