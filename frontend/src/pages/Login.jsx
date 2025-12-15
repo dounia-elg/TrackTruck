@@ -36,7 +36,7 @@ function Login() {
             if (response.data.user.role === "admin") {
                 navigate("/admin/dashboard");
             } else {
-                navigate("/driver/dashboard");
+                navigate("/driver/my-trips");
             }
 
         } catch (err) {
