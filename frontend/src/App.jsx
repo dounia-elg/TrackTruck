@@ -7,6 +7,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Trucks from './pages/admin/Trucks';
 import Trailers from './pages/admin/Trailers';
 import Trips from './pages/admin/Trips';
+import MyTrips from './pages/driver/MyTrips';
 
 function App() {
   return (
@@ -43,6 +44,13 @@ function App() {
           </ProtectedRoute>
         }
         />
+
+        {/* Driver Routes */}
+        <Route path="/driver/my-trips" element={
+          <ProtectedRoute role="driver">
+            <MyTrips />
+          </ProtectedRoute>
+        } />
 
 
 
