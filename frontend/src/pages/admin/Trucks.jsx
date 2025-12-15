@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FaTruck, FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
+import { FaTruck, FaEdit, FaTrash, FaPlus, FaExclamationTriangle } from 'react-icons/fa';
 import AdminSidebar from '../../components/AdminSidebar';
 import axios from 'axios';
 
 function Trucks() {
-    
+
     const token = localStorage.getItem('token');
 
     const [trucks, setTrucks] = useState([]);
@@ -18,6 +18,7 @@ function Trucks() {
         modele: '',
         capaciteCarburant: '',
         kilometrage: '',
+        prochainEntretien: '',
         statut: 'disponible'
     });
 
@@ -48,7 +49,10 @@ function Trucks() {
     const handleAdd = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('http://localhost:3001/api/trucks', formData, {
+            const payload = { ...formData };
+            if (!payload.prochainEntretien) payload.prochainEntretien = 30000;
+
+            await axios.post('http://localhost:3001/api/trucks', payload, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchTrucks(); // Refresh list
@@ -62,10 +66,13 @@ function Trucks() {
     const handleUpdate = async (e) => {
         e.preventDefault();
         try {
-            await axios.put(`http://localhost:3001/api/trucks/${editingTruck._id}`, formData, {
+            const payload = { ...formData };
+            if (!payload.prochainEntretien) payload.prochainEntretien = 30000;
+
+            await axios.put(`http://localhost:3001/api/trucks/${editingTruck._id}`, payload, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            fetchTrucks(); 
+            fetchTrucks();
             resetForm();
             alert('Camion modifié avec succès!');
         } catch (error) {
@@ -79,7 +86,7 @@ function Trucks() {
                 await axios.delete(`http://localhost:3001/api/trucks/${id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                fetchTrucks(); 
+                fetchTrucks();
                 alert('Camion supprimé!');
             } catch (error) {
                 alert('Erreur: ' + (error.response?.data?.error || 'Erreur inconnue'));
@@ -94,6 +101,7 @@ function Trucks() {
             modele: truck.modele,
             capaciteCarburant: truck.capaciteCarburant,
             kilometrage: truck.kilometrage,
+            prochainEntretien: truck.prochainEntretien || 30000,
             statut: truck.statut
         });
         setShowForm(true);
@@ -105,6 +113,7 @@ function Trucks() {
             modele: '',
             capaciteCarburant: '',
             kilometrage: '',
+            prochainEntretien: '',
             statut: 'disponible'
         });
         setEditingTruck(null);
@@ -195,6 +204,19 @@ function Trucks() {
                                         />
                                     </div>
 
+                                    <div className="flex-1">
+                                        <label className="block text-sm font-medium mb-1 text-red-600">Proch. Entretien</label>
+                                        <input
+                                            type="number"
+                                            name="prochainEntretien"
+                                            value={formData.prochainEntretien}
+                                            onChange={handleChange}
+                                            className="w-full px-3 py-2 border border-red-200 rounded-lg bg-red-50"
+                                            placeholder="30000"
+                                        />
+                                    </div>
+
+
                                     <div>
                                         <label className="block text-sm font-medium mb-1">Statut</label>
                                         <select
@@ -221,59 +243,74 @@ function Trucks() {
                                 </form>
                             </div>
                         </div>
-                    )}
+                    )
+                    }
 
                     {/* Trucks Table */}
-                    {loading ? (
-                        <p className="text-center py-12 text-gray-500">Chargement...</p>
-                    ) : trucks.length === 0 ? (
-                        <p className="text-center py-12 text-gray-500">Aucun camion trouvé</p>
-                    ) : (
-                        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                            <table className="w-full">
-                                <thead className="bg-gray-700 border-b">
-                                    <tr>
-                                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">Immatriculation</th>
-                                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">Modèle</th>
-                                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">Carburant (L)</th>
-                                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">Kilométrage</th>
-                                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">Statut</th>
-                                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {trucks.map((truck) => (
-                                        <tr key={truck._id} className="border-b border-gray-200 hover:bg-gray-50">
-                                            <td className="px-6 py-4 font-medium">{truck.immatriculation}</td>
-                                            <td className="px-6 py-4">{truck.modele}</td>
-                                            <td className="px-6 py-4">{truck.capaciteCarburant}</td>
-                                            <td className="px-6 py-4">{truck.kilometrage} km</td>
-                                            <td className="px-6 py-4">
-                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${truck.statut === 'disponible' ? 'bg-green-100 text-green-800' :
+                    {
+                        loading ? (
+                            <p className="text-center py-12 text-gray-500">Chargement...</p>
+                        ) : trucks.length === 0 ? (
+                            <p className="text-center py-12 text-gray-500">Aucun camion trouvé</p>
+                        ) : (
+                            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                                <table className="w-full">
+                                    <thead className="bg-gray-700 border-b">
+                                        <tr>
+                                            <th className="px-6 py-3 text-left text-sm font-semibold text-white">Immatriculation</th>
+                                            <th className="px-6 py-3 text-left text-sm font-semibold text-white">Modèle</th>
+                                            <th className="px-6 py-3 text-left text-sm font-semibold text-white">Carburant (L)</th>
+                                            <th className="px-6 py-3 text-left text-sm font-semibold text-white">Kilométrage</th>
+                                            <th className="px-6 py-3 text-left text-sm font-semibold text-white">Maintenance</th>
+                                            <th className="px-6 py-3 text-left text-sm font-semibold text-white">Statut</th>
+                                            <th className="px-6 py-3 text-left text-sm font-semibold text-white">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {trucks.map((truck) => (
+                                            <tr key={truck._id} className="border-b border-gray-200 hover:bg-gray-50">
+                                                <td className="px-6 py-4 font-medium">{truck.immatriculation}</td>
+                                                <td className="px-6 py-4">{truck.modele}</td>
+                                                <td className="px-6 py-4">{truck.capaciteCarburant}</td>
+                                                <td className="px-6 py-4">{truck.kilometrage} km</td>
+                                                <td className="px-6 py-4">
+                                                    {truck.kilometrage >= truck.prochainEntretien ? (
+                                                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-red-100 text-red-700 text-xs font-bold animate-pulse">
+                                                            <FaExclamationTriangle /> Urgent
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-xs text-gray-400">
+                                                            Dans {truck.prochainEntretien - truck.kilometrage} km
+                                                        </span>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${truck.statut === 'disponible' ? 'bg-green-100 text-green-800' :
                                                         truck.statut === 'en service' ? 'bg-blue-100 text-blue-800' :
                                                             truck.statut === 'en maintenance' ? 'bg-yellow-100 text-yellow-800' :
                                                                 'bg-red-100 text-red-800'
-                                                    }`}>
-                                                    {truck.statut}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <button onClick={() => startEdit(truck)} className="text-green-600 hover:text-green-800 mr-3">
-                                                    <FaEdit />
-                                                </button>
-                                                <button onClick={() => handleDelete(truck._id)} className="text-red-600 hover:text-red-800">
-                                                    <FaTrash />
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-                </main>
-            </div>
-        </div>
+                                                        }`}>
+                                                        {truck.statut}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <button onClick={() => startEdit(truck)} className="text-green-600 hover:text-green-800 mr-3">
+                                                        <FaEdit />
+                                                    </button>
+                                                    <button onClick={() => handleDelete(truck._id)} className="text-red-600 hover:text-red-800">
+                                                        <FaTrash />
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )
+                    }
+                </main >
+            </div >
+        </div >
     );
 }
 

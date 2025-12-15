@@ -10,6 +10,7 @@ export const createTruck = async (req, res) => {
       capaciteCarburant,
       kilometrage,
       statut,
+      maintenanceRules: req.body.maintenanceRules || [],
     });
 
     await truck.save();
@@ -34,6 +35,7 @@ export const updateTruck = async (req, res) => {
         capaciteCarburant,
         kilometrage,
         statut,
+        maintenanceRules: req.body.maintenanceRules,
       },
       { new: true, runValidators: true }
     );
@@ -67,7 +69,7 @@ export const deleteTruck = async (req, res) => {
 export const getAllTrucks = async (req, res) => {
   try {
     const { statut } = req.query;
-    
+
     const filter = {};
     if (statut) filter.statut = statut;
     const trucks = await Truck.find(filter).sort({ createdAt: -1 });
