@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FaTruck, FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
+import { FaTruck, FaEdit, FaTrash, FaPlus, FaExclamationTriangle } from 'react-icons/fa';
 import AdminSidebar from '../../components/AdminSidebar';
 import axios from 'axios';
 
 function Trucks() {
-    
+
     const token = localStorage.getItem('token');
 
     const [trucks, setTrucks] = useState([]);
@@ -18,7 +18,9 @@ function Trucks() {
         modele: '',
         capaciteCarburant: '',
         kilometrage: '',
-        statut: 'disponible'
+        prochainEntretien: '',
+        statut: 'disponible',
+        maintenanceRules: []
     });
 
     useEffect(() => {
@@ -45,10 +47,32 @@ function Trucks() {
         });
     };
 
+    const addRule = () => {
+        setFormData({
+            ...formData,
+            maintenanceRules: [...(formData.maintenanceRules || []), { type: '', intervalKm: 10000, lastKm: 0 }]
+        });
+    };
+
+    const removeRule = (index) => {
+        const newRules = [...formData.maintenanceRules];
+        newRules.splice(index, 1);
+        setFormData({ ...formData, maintenanceRules: newRules });
+    };
+
+    const handleRuleChange = (index, field, value) => {
+        const newRules = [...formData.maintenanceRules];
+        newRules[index][field] = value;
+        setFormData({ ...formData, maintenanceRules: newRules });
+    };
+
     const handleAdd = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('http://localhost:3001/api/trucks', formData, {
+            const payload = { ...formData };
+            if (!payload.prochainEntretien) payload.prochainEntretien = 30000;
+
+            await axios.post('http://localhost:3001/api/trucks', payload, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchTrucks(); // Refresh list
@@ -62,10 +86,13 @@ function Trucks() {
     const handleUpdate = async (e) => {
         e.preventDefault();
         try {
-            await axios.put(`http://localhost:3001/api/trucks/${editingTruck._id}`, formData, {
+            const payload = { ...formData };
+            if (!payload.prochainEntretien) payload.prochainEntretien = 30000;
+
+            await axios.put(`http://localhost:3001/api/trucks/${editingTruck._id}`, payload, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            fetchTrucks(); 
+            fetchTrucks();
             resetForm();
             alert('Camion modifié avec succès!');
         } catch (error) {
@@ -79,7 +106,7 @@ function Trucks() {
                 await axios.delete(`http://localhost:3001/api/trucks/${id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                fetchTrucks(); 
+                fetchTrucks();
                 alert('Camion supprimé!');
             } catch (error) {
                 alert('Erreur: ' + (error.response?.data?.error || 'Erreur inconnue'));
@@ -94,7 +121,9 @@ function Trucks() {
             modele: truck.modele,
             capaciteCarburant: truck.capaciteCarburant,
             kilometrage: truck.kilometrage,
-            statut: truck.statut
+            prochainEntretien: truck.prochainEntretien || 30000,
+            statut: truck.statut,
+            maintenanceRules: truck.maintenanceRules || []
         });
         setShowForm(true);
     };
@@ -105,7 +134,9 @@ function Trucks() {
             modele: '',
             capaciteCarburant: '',
             kilometrage: '',
-            statut: 'disponible'
+            prochainEntretien: '',
+            statut: 'disponible',
+            maintenanceRules: []
         });
         setEditingTruck(null);
         setShowForm(false);
@@ -195,6 +226,19 @@ function Trucks() {
                                         />
                                     </div>
 
+                                    <div className="flex-1">
+                                        <label className="block text-sm font-medium mb-1 text-red-600">Proch. Entretien</label>
+                                        <input
+                                            type="number"
+                                            name="prochainEntretien"
+                                            value={formData.prochainEntretien}
+                                            onChange={handleChange}
+                                            className="w-full px-3 py-2 border border-red-200 rounded-lg bg-red-50"
+                                            placeholder="30000"
+                                        />
+                                    </div>
+
+
                                     <div>
                                         <label className="block text-sm font-medium mb-1">Statut</label>
                                         <select
@@ -210,6 +254,54 @@ function Trucks() {
                                         </select>
                                     </div>
 
+                                    {/* Maintenance Rules Section */}
+                                    <div className="border-t pt-4">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <label className="block text-sm font-bold">Règles de Maintenance</label>
+                                            <button type="button" onClick={addRule} className="text-xs bg-gray-200 px-2 py-1 rounded hover:bg-gray-300">
+                                                + Ajouter
+                                            </button>
+                                        </div>
+
+                                        <div className="space-y-3 max-h-40 overflow-y-auto">
+                                            {formData.maintenanceRules && formData.maintenanceRules.map((rule, index) => (
+                                                <div key={index} className="flex gap-2 items-start bg-gray-50 p-2 rounded">
+                                                    <div className="flex-1 space-y-1">
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Type (ex: Vidange)"
+                                                            value={rule.type}
+                                                            onChange={(e) => handleRuleChange(index, 'type', e.target.value)}
+                                                            className="w-full text-xs px-2 py-1 border rounded"
+                                                        />
+                                                        <div className="flex gap-1">
+                                                            <input
+                                                                type="number"
+                                                                placeholder="Intervalle (km)"
+                                                                value={rule.intervalKm}
+                                                                onChange={(e) => handleRuleChange(index, 'intervalKm', parseInt(e.target.value) || 0)}
+                                                                className="w-1/2 text-xs px-2 py-1 border rounded"
+                                                            />
+                                                            <input
+                                                                type="number"
+                                                                placeholder="Dernier (km)"
+                                                                value={rule.lastKm}
+                                                                onChange={(e) => handleRuleChange(index, 'lastKm', parseInt(e.target.value) || 0)}
+                                                                className="w-1/2 text-xs px-2 py-1 border rounded"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <button type="button" onClick={() => removeRule(index)} className="text-red-500 hover:text-red-700">
+                                                        <FaTrash size={12} />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                            {(!formData.maintenanceRules || formData.maintenanceRules.length === 0) && (
+                                                <p className="text-xs text-gray-400 italic text-center">Aucune règle définie</p>
+                                            )}
+                                        </div>
+                                    </div>
+
                                     <div className="flex gap-3">
                                         <button type="submit" className="flex-1 bg-black text-white py-2 rounded-lg hover:bg-gray-800">
                                             {editingTruck ? 'Modifier' : 'Ajouter'}
@@ -221,59 +313,63 @@ function Trucks() {
                                 </form>
                             </div>
                         </div>
-                    )}
+                    )
+                    }
 
                     {/* Trucks Table */}
-                    {loading ? (
-                        <p className="text-center py-12 text-gray-500">Chargement...</p>
-                    ) : trucks.length === 0 ? (
-                        <p className="text-center py-12 text-gray-500">Aucun camion trouvé</p>
-                    ) : (
-                        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                            <table className="w-full">
-                                <thead className="bg-gray-700 border-b">
-                                    <tr>
-                                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">Immatriculation</th>
-                                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">Modèle</th>
-                                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">Carburant (L)</th>
-                                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">Kilométrage</th>
-                                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">Statut</th>
-                                        <th className="px-6 py-3 text-left text-sm font-semibold text-white">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {trucks.map((truck) => (
-                                        <tr key={truck._id} className="border-b border-gray-200 hover:bg-gray-50">
-                                            <td className="px-6 py-4 font-medium">{truck.immatriculation}</td>
-                                            <td className="px-6 py-4">{truck.modele}</td>
-                                            <td className="px-6 py-4">{truck.capaciteCarburant}</td>
-                                            <td className="px-6 py-4">{truck.kilometrage} km</td>
-                                            <td className="px-6 py-4">
-                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${truck.statut === 'disponible' ? 'bg-green-100 text-green-800' :
+                    {
+                        loading ? (
+                            <p className="text-center py-12 text-gray-500">Chargement...</p>
+                        ) : trucks.length === 0 ? (
+                            <p className="text-center py-12 text-gray-500">Aucun camion trouvé</p>
+                        ) : (
+                            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                                <table className="w-full">
+                                    <thead className="bg-gray-700 border-b">
+                                        <tr>
+                                            <th className="px-6 py-3 text-left text-sm font-semibold text-white">Immatriculation</th>
+                                            <th className="px-6 py-3 text-left text-sm font-semibold text-white">Modèle</th>
+                                            <th className="px-6 py-3 text-left text-sm font-semibold text-white">Carburant (L)</th>
+                                            <th className="px-6 py-3 text-left text-sm font-semibold text-white">Kilométrage</th>
+                                            <th className="px-6 py-3 text-left text-sm font-semibold text-white">Statut</th>
+                                            <th className="px-6 py-3 text-left text-sm font-semibold text-white">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {trucks.map((truck) => (
+                                            <tr key={truck._id} className="border-b border-gray-200 hover:bg-gray-50">
+                                                <td className="px-6 py-4 font-medium">{truck.immatriculation}</td>
+                                                <td className="px-6 py-4">{truck.modele}</td>
+                                                <td className="px-6 py-4">{truck.capaciteCarburant}</td>
+                                                <td className="px-6 py-4">{truck.kilometrage} km</td>
+                                                
+                                                <td className="px-6 py-4">
+                                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${truck.statut === 'disponible' ? 'bg-green-100 text-green-800' :
                                                         truck.statut === 'en service' ? 'bg-blue-100 text-blue-800' :
                                                             truck.statut === 'en maintenance' ? 'bg-yellow-100 text-yellow-800' :
                                                                 'bg-red-100 text-red-800'
-                                                    }`}>
-                                                    {truck.statut}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <button onClick={() => startEdit(truck)} className="text-green-600 hover:text-green-800 mr-3">
-                                                    <FaEdit />
-                                                </button>
-                                                <button onClick={() => handleDelete(truck._id)} className="text-red-600 hover:text-red-800">
-                                                    <FaTrash />
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-                </main>
-            </div>
-        </div>
+                                                        }`}>
+                                                        {truck.statut}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <button onClick={() => startEdit(truck)} className="text-green-600 hover:text-green-800 mr-3">
+                                                        <FaEdit />
+                                                    </button>
+                                                    <button onClick={() => handleDelete(truck._id)} className="text-red-600 hover:text-red-800">
+                                                        <FaTrash />
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )
+                    }
+                </main >
+            </div >
+        </div >
     );
 }
 

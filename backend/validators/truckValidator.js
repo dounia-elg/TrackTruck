@@ -30,4 +30,22 @@ export const validateTruck = [
     .optional()
     .isIn(["disponible", "en service", "en maintenance", "hors service"])
     .withMessage("Statut invalide"),
+
+  body("maintenanceRules")
+    .optional()
+    .isArray()
+    .withMessage("Les règles de maintenance doivent être un tableau"),
+
+  body("maintenanceRules.*.type")
+    .notEmpty()
+    .withMessage("Le type de maintenance est requis"),
+
+  body("maintenanceRules.*.intervalKm")
+    .isNumeric()
+    .withMessage("L'intervalle doit être un nombre"),
+
+  body("maintenanceRules.*.lastKm")
+    .optional()
+    .isNumeric()
+    .withMessage("Le dernier kilométrage doit être un nombre"),
 ];
