@@ -7,6 +7,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Trucks from './pages/admin/Trucks';
 import Trailers from './pages/admin/Trailers';
 import Trips from './pages/admin/Trips';
+import Maintenance from './pages/admin/Maintenance';
 import MyTrips from './pages/driver/MyTrips';
 
 function App() {
@@ -41,6 +42,12 @@ function App() {
         <Route path="/admin/trips" element={
           <ProtectedRoute allowedRole="admin">
             <Trips />
+          </ProtectedRoute>
+        }
+        />
+        <Route path="/admin/maintenance" element={
+          <ProtectedRoute allowedRole="admin">
+            <Maintenance />
           </ProtectedRoute>
         }
         />
