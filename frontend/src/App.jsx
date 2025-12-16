@@ -6,6 +6,7 @@ import AdminDashboard from './pages/admin/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import Trucks from './pages/admin/Trucks';
 import Trailers from './pages/admin/Trailers';
+import Tires from './pages/admin/Tires';
 import Trips from './pages/admin/Trips';
 import Maintenance from './pages/admin/Maintenance';
 import MyTrips from './pages/driver/MyTrips';
@@ -38,6 +39,12 @@ function App() {
           <Route path="/admin/trailers" element={
             <ProtectedRoute allowedRole="admin">
               <Trailers />
+            </ProtectedRoute>
+          }
+          />
+          <Route path="/admin/tires" element={
+            <ProtectedRoute allowedRole="admin">
+              <Tires />
             </ProtectedRoute>
           }
           />

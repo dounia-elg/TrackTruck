@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { FaTruck, FaTrailer, FaRoute, FaHome, FaSignOutAlt, FaWrench } from 'react-icons/fa';
+import { FaTruck, FaTrailer, FaRoute, FaHome, FaSignOutAlt, FaWrench, FaCog } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 
 function AdminSidebar({ activePage }) {
@@ -43,6 +43,13 @@ function AdminSidebar({ activePage }) {
                         }`}
                 >
                     <FaTrailer /> Remorques
+                </Link>
+                <Link
+                    to="/admin/tires"
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition mb-2 ${activePage === 'tires' ? 'bg-gray-800 text-white' : 'hover:bg-gray-800'
+                        }`}
+                >
+                    <FaCog /> Pneus
                 </Link>
                 <Link
                     to="/admin/trips"
