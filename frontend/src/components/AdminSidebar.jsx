@@ -1,13 +1,13 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { FaTruck, FaTrailer, FaRoute, FaHome, FaSignOutAlt, FaWrench } from 'react-icons/fa';
+import { useAuth } from '../context/AuthContext';
 
 function AdminSidebar({ activePage }) {
     const navigate = useNavigate();
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const { user, logout } = useAuth();
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        logout();
         navigate('/login');
     };
 

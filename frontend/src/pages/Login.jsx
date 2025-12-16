@@ -2,9 +2,11 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaTruck, FaEnvelope, FaLock } from "react-icons/fa";
 import axios from "axios";
+import { useAuth } from "../context/AuthContext";
 
 function Login() {
     const navigate = useNavigate();
+    const { login } = useAuth();
     const [formData, setFormData] = useState({
         email: "",
         password: "",
@@ -30,8 +32,7 @@ function Login() {
                 formData
             );
 
-            localStorage.setItem("token", response.data.token);
-            localStorage.setItem("user", JSON.stringify(response.data.user));
+            login(response.data);
 
             if (response.data.user.role === "admin") {
                 navigate("/admin/dashboard");

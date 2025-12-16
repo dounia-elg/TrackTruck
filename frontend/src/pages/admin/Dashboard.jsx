@@ -4,6 +4,7 @@ import { FaTruck, FaTrailer, FaRoute } from 'react-icons/fa';
 import axios from 'axios';
 import AdminSidebar from '../../components/AdminSidebar';
 
+
 function AdminDashboard() {
     const navigate = useNavigate();
 
