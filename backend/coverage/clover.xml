@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1765898685875" clover="3.2.0">
-  <project timestamp="1765898685875" name="All files">
+<coverage generated="1765899345355" clover="3.2.0">
+  <project timestamp="1765899345356" name="All files">
     <metrics statements="206" coveredstatements="187" conditionals="74" coveredconditionals="56" methods="24" coveredmethods="24" elements="304" coveredelements="267" complexity="0" loc="206" ncloc="206" packages="1" files="5" classes="5"/>
     <file name="authController.js" path="C:\Users\youco\Desktop\TrackTruck\backend\controllers\authController.js">
       <metrics statements="31" coveredstatements="30" conditionals="8" coveredconditionals="7" methods="4" coveredmethods="4"/>
