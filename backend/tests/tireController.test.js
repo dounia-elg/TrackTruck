@@ -34,7 +34,7 @@ jest.unstable_mockModule('../models/Truck.js', () => ({
     default: MockTruck
 }));
 
-const { createTire, getAllTires } = await import('../controllers/tireController.js');
+const { createTire, getAllTires, updateTire, deleteTire } = await import('../controllers/tireController.js');
 
 const mockRequest = (body = {}, params = {}, query = {}) => ({
     body,
@@ -118,6 +118,84 @@ describe('Tire Controller Tests', () => {
                 count: 2,
                 tires: fakeTires
             });
+        });
+
+        test('Should handle database errors', async () => {
+            mockFind.mockImplementation(() => {
+                throw new Error('DB Error');
+            });
+
+            const req = mockRequest();
+            const res = mockResponse();
+
+            await getAllTires(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(500);
+        });
+    });
+
+    test('Should handle createTire database errors', async () => {
+        mockTruckFindById.mockRejectedValue(new Error('DB Error'));
+
+        const req = mockRequest({ camion: 'truck_123' });
+        const res = mockResponse();
+
+        await createTire(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(500);
+    });
+
+    describe('updateTire', () => {
+        test('Should update tire successfully', async () => {
+            MockTire.findByIdAndUpdate = jest.fn().mockReturnValue({
+                populate: jest.fn().mockResolvedValue({ _id: 'tire_1', usure: 50 })
+            });
+
+            const req = mockRequest({ usure: 50 }, { id: 'tire_1' });
+            const res = mockResponse();
+
+            await updateTire(req, res);
+
+            expect(MockTire.findByIdAndUpdate).toHaveBeenCalled();
+            expect(res.json).toHaveBeenCalled();
+        });
+
+        test('Should return 404 if tire not found', async () => {
+            MockTire.findByIdAndUpdate = jest.fn().mockReturnValue({
+                populate: jest.fn().mockResolvedValue(null)
+            });
+
+            const req = mockRequest({ usure: 50 }, { id: 'invalid_id' });
+            const res = mockResponse();
+
+            await updateTire(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(404);
+        });
+    });
+
+    describe('deleteTire', () => {
+        test('Should delete tire successfully', async () => {
+            MockTire.findByIdAndDelete = jest.fn().mockResolvedValue({ _id: 'tire_1' });
+
+            const req = mockRequest({}, { id: 'tire_1' });
+            const res = mockResponse();
+
+            await deleteTire(req, res);
+
+            expect(MockTire.findByIdAndDelete).toHaveBeenCalledWith('tire_1');
+            expect(res.json).toHaveBeenCalled();
+        });
+
+        test('Should return 404 if tire not found', async () => {
+            MockTire.findByIdAndDelete = jest.fn().mockResolvedValue(null);
+
+            const req = mockRequest({}, { id: 'invalid_id' });
+            const res = mockResponse();
+
+            await deleteTire(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(404);
         });
     });
 

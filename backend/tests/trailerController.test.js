@@ -26,7 +26,7 @@ jest.unstable_mockModule('../models/Trailer.js', () => ({
     default: MockTrailer
 }));
 
-const { createTrailer, getAllTrailers } = await import('../controllers/trailerController.js');
+const { createTrailer, getAllTrailers, updateTrailer, deleteTrailer, getTrailerById } = await import('../controllers/trailerController.js');
 
 const mockRequest = (body = {}, params = {}, query = {}) => ({
     body,
@@ -104,6 +104,100 @@ describe('Trailer Controller Tests', () => {
                 count: 2,
                 trailers: fakeTrailers
             });
+        });
+
+        test('Should handle database errors', async () => {
+            mockFind.mockImplementation(() => {
+                throw new Error('DB Error');
+            });
+
+            const req = mockRequest();
+            const res = mockResponse();
+
+            await getAllTrailers(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(500);
+        });
+    });
+
+    describe('updateTrailer', () => {
+        test('Should update trailer successfully', async () => {
+            MockTrailer.findByIdAndUpdate = jest.fn().mockResolvedValue({ _id: 'trailer_1', type: 'Bâche' });
+
+            const req = mockRequest({ type: 'Bâche' }, { id: 'trailer_1' });
+            const res = mockResponse();
+
+            await updateTrailer(req, res);
+
+            expect(MockTrailer.findByIdAndUpdate).toHaveBeenCalled();
+            expect(res.json).toHaveBeenCalled();
+        });
+
+        test('Should return 404 if trailer not found', async () => {
+            MockTrailer.findByIdAndUpdate = jest.fn().mockReturnValue({
+                populate: jest.fn().mockResolvedValue(null)
+            });
+
+            const req = mockRequest({ type: 'Bâche' }, { id: 'invalid_id' });
+            const res = mockResponse();
+
+            await updateTrailer(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(404);
+        });
+    });
+
+    describe('deleteTrailer', () => {
+        test('Should delete trailer successfully', async () => {
+            MockTrailer.findByIdAndDelete = jest.fn().mockResolvedValue({ _id: 'trailer_1' });
+
+            const req = mockRequest({}, { id: 'trailer_1' });
+            const res = mockResponse();
+
+            await deleteTrailer(req, res);
+
+            expect(MockTrailer.findByIdAndDelete).toHaveBeenCalledWith('trailer_1');
+            expect(res.json).toHaveBeenCalled();
+        });
+
+        test('Should return 404 if trailer not found', async () => {
+            MockTrailer.findByIdAndDelete = jest.fn().mockResolvedValue(null);
+
+            const req = mockRequest({}, { id: 'invalid_id' });
+            const res = mockResponse();
+
+            await deleteTrailer(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(404);
+        });
+    });
+
+    describe('getTrailerById', () => {
+        test('Should return trailer by id', async () => {
+            MockTrailer.findById = jest.fn().mockReturnValue({
+                populate: jest.fn().mockResolvedValue({ _id: 'trailer_1', immatriculation: 'T-01' })
+            });
+
+            const req = mockRequest({}, { id: 'trailer_1' });
+            const res = mockResponse();
+
+            await getTrailerById(req, res);
+
+            expect(MockTrailer.findById).toHaveBeenCalledWith('trailer_1');
+            expect(res.json).toHaveBeenCalled();
+        });
+
+        test('Should return 404 if trailer not found', async () => {
+            MockTrailer.findById = jest.fn().mockReturnValue({
+                populate: jest.fn().mockResolvedValue(null)
+            });
+
+            const req = mockRequest({}, { id: 'invalid_id' });
+            const res = mockResponse();
+
+            await getTrailerById(req, res);
+
+            expect(res.status).toHaveBeenCalledWith(404);
         });
     });
 

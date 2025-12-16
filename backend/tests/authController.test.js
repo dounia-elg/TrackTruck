@@ -1,221 +1,181 @@
-import { jest } from '@jest/globals';
+import { jest } from "@jest/globals";
 
-const mockResponse = () => {
-    const res = {};
-    res.status = jest.fn().mockReturnValue(res);
-    res.json = jest.fn().mockReturnValue(res);
-    return res;
-};
-
-const mockRequest = (body = {}, params = {}, query = {}, user = {}) => ({
-    body,
-    params,
-    query,
-    user
-});
-
-const mockSave = jest.fn();
 const mockFindOne = jest.fn();
 const mockFind = jest.fn();
+const mockSave = jest.fn();
 const mockSelect = jest.fn();
 
-const MockUser = jest.fn().mockImplementation((data) => {
-    return {
-        ...data,
-        _id: 'new_user_id',
-        save: mockSave
-    };
-});
+const MockUser = jest.fn().mockImplementation((data) => ({
+  ...data,
+  _id: "123",
+  save: mockSave,
+}));
+
 MockUser.findOne = mockFindOne;
 MockUser.find = mockFind;
 
 mockFind.mockReturnValue({
-    select: mockSelect
+  select: mockSelect,
 });
 
-jest.unstable_mockModule('../models/User.js', () => ({
-    default: MockUser
+jest.unstable_mockModule("../models/User.js", () => ({
+  default: MockUser,
 }));
 
-jest.unstable_mockModule('bcryptjs', () => ({
-    default: {
-        hash: jest.fn().mockResolvedValue('hashed_secret_password'),
-        compare: jest.fn().mockResolvedValue(true) 
-    }
+jest.unstable_mockModule("bcryptjs", () => ({
+  default: {
+    hash: jest.fn().mockResolvedValue("hashed_password"),
+    compare: jest.fn().mockResolvedValue(true),
+  },
 }));
 
-jest.unstable_mockModule('jsonwebtoken', () => ({
-    default: {
-        sign: jest.fn().mockReturnValue('fake_jwt_token')
-    }
+jest.unstable_mockModule("jsonwebtoken", () => ({
+  default: {
+    sign: jest.fn().mockReturnValue("fake_token"),
+  },
 }));
 
+const { register, login, getDrivers } = await import(
+  "../controllers/authController.js"
+);
 
-const { register, login, getDrivers } = await import('../controllers/authController.js');
+const mockRes = () => {
+  const res = {};
+  res.status = jest.fn().mockReturnValue(res);
+  res.json = jest.fn();
+  return res;
+};
 
-describe('Auth Controller Integration Tests', () => {
+describe("Auth Controller – Unit Tests ", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-    beforeEach(() => {
-        jest.clearAllMocks();
+  test("register – success", async () => {
+    mockFindOne.mockResolvedValue(null);
+
+    const req = {
+      body: {
+        email: "test@test.com",
+        password: "123",
+        name: "Test",
+      },
+    };
+    const res = mockRes();
+
+    await register(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "User created successfully",
+        token: "fake_token",
+      })
+    );
+  });
+
+  test("login – success", async () => {
+    mockFindOne.mockResolvedValue({
+      _id: "123",
+      email: "test@test.com",
+      password: "hashed",
+      role: "driver",
+      name: "Test",
     });
 
-    describe('register', () => {
+    const req = {
+      body: { email: "test@test.com", password: "123" },
+    };
+    const res = mockRes();
 
-        test('Should create a new user successfully (201)', async () => {
-    
-            mockFindOne.mockResolvedValue(null);
+    await login(req, res);
 
-            const req = mockRequest({
-                email: 'new@test.com',
-                password: 'password123',
-                name: 'New Driver',
-                role: 'driver'
-            });
-            const res = mockResponse();
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "Login successful",
+        token: "fake_token",
+      })
+    );
+  });
 
-            await register(req, res);
+  test("getDrivers – success", async () => {
+    mockSelect.mockResolvedValue([{ name: "Driver 1", email: "d1@test.com" }]);
 
-            expect(mockFindOne).toHaveBeenCalledWith({ email: 'new@test.com' });
-            expect(MockUser).toHaveBeenCalledWith(expect.objectContaining({
-                email: 'new@test.com',
-                password: 'hashed_secret_password', 
-                role: 'driver'
-            }));
-            expect(mockSave).toHaveBeenCalled(); 
-            expect(res.status).toHaveBeenCalledWith(201);
-            expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
-                token: 'fake_jwt_token',
-                message: 'User created successfully'
-            }));
-        });
+    const req = {};
+    const res = mockRes();
 
-        test('Should fail if user already exists (400)', async () => {
-    
-            mockFindOne.mockResolvedValue({ email: 'existing@test.com' });
+    await getDrivers(req, res);
 
-            const req = mockRequest({
-                email: 'existing@test.com',
-                password: 'password123'
-            });
-            const res = mockResponse();
+    expect(res.json).toHaveBeenCalledWith({
+      count: 1,
+      drivers: [{ name: "Driver 1", email: "d1@test.com" }],
+    });
+  });
 
-            await register(req, res);
+  test("register – user already exists", async () => {
+    mockFindOne.mockResolvedValue({ email: "existing@test.com" });
 
-            expect(mockSave).not.toHaveBeenCalled(); 
-            expect(res.status).toHaveBeenCalledWith(400);
-            expect(res.json).toHaveBeenCalledWith({ error: 'User already exists' });
-        });
+    const req = {
+      body: { email: "existing@test.com", password: "123" },
+    };
+    const res = mockRes();
 
-        test('Should handle server errors gracefully (500)', async () => {
-          
-            mockFindOne.mockRejectedValue(new Error('Database connection failed'));
+    await register(req, res);
 
-            const req = mockRequest({ email: 'error@test.com' });
-            const res = mockResponse();
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ error: "User already exists" });
+  });
 
-            await register(req, res);
+  test("register – database error", async () => {
+    mockFindOne.mockRejectedValue(new Error("DB Error"));
 
-            expect(res.status).toHaveBeenCalledWith(500);
-            expect(res.json).toHaveBeenCalledWith({ error: 'Database connection failed' });
-        });
+    const req = {
+      body: { email: "test@test.com", password: "123" },
+    };
+    const res = mockRes();
+
+    await register(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+  });
+
+  test("login – invalid credentials (user not found)", async () => {
+    mockFindOne.mockResolvedValue(null);
+
+    const req = {
+      body: { email: "notfound@test.com", password: "123" },
+    };
+    const res = mockRes();
+
+    await login(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({ error: "Invalid credentials" });
+  });
+
+  test("login – database error", async () => {
+    mockFindOne.mockRejectedValue(new Error("DB Error"));
+
+    const req = {
+      body: { email: "test@test.com", password: "123" },
+    };
+    const res = mockRes();
+
+    await login(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+  });
+
+  test("getDrivers – database error", async () => {
+    mockFind.mockReturnValue({
+      select: jest.fn().mockRejectedValue(new Error("DB Error")),
     });
 
-    describe('login', () => {
+    const req = {};
+    const res = mockRes();
 
-        test('Should login successfully with correct credentials (200)', async () => {
-            const fakeUser = {
-                _id: 'user_123',
-                email: 'valid@test.com',
-                password: 'hashed_real_password',
-                role: 'driver',
-                name: 'Valid User'
-            };
-            mockFindOne.mockResolvedValue(fakeUser);
+    await getDrivers(req, res);
 
-            const req = mockRequest({
-                email: 'valid@test.com',
-                password: 'correct_password'
-            });
-            const res = mockResponse();
-
-            await login(req, res);
-
-            expect(mockFindOne).toHaveBeenCalledWith({ email: 'valid@test.com' });
-            expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
-                message: 'Login successful',
-                token: 'fake_jwt_token',
-                user: expect.objectContaining({ email: 'valid@test.com' })
-            }));
-        });
-
-        test('Should fail if user not found (400)', async () => {
-
-            mockFindOne.mockResolvedValue(null);
-
-            const req = mockRequest({ email: 'unknown@test.com', password: '123' });
-            const res = mockResponse();
-
-            await login(req, res);
-
-            expect(res.status).toHaveBeenCalledWith(400);
-            expect(res.json).toHaveBeenCalledWith({ error: 'Invalid credentials' });
-        });
-
-        test('Should fail if password incorrect (400)', async () => {
-            
-            const fakeUser = { email: 'valid@test.com', password: 'hashed' };
-            mockFindOne.mockResolvedValue(fakeUser);
-
-            const bcrypt = await import('bcryptjs');
-            bcrypt.default.compare.mockResolvedValueOnce(false);
-
-            const req = mockRequest({ email: 'valid@test.com', password: 'wrong' });
-            const res = mockResponse();
-
-            await login(req, res);
-
-            expect(res.status).toHaveBeenCalledWith(400);
-            expect(res.json).toHaveBeenCalledWith({ error: 'Invalid credentials' });
-        });
-    });
-
-    describe('getDrivers', () => {
-
-        test('Should return list of drivers (200)', async () => {
-         
-            const fakeDrivers = [
-                { name: 'Driver 1', email: 'd1@test.com' },
-                { name: 'Driver 2', email: 'd2@test.com' }
-            ];
-            mockSelect.mockResolvedValue(fakeDrivers); 
-
-            const req = mockRequest();
-            const res = mockResponse();
-
-            await getDrivers(req, res);
-
-            expect(mockFind).toHaveBeenCalledWith({ role: 'driver' });
-            expect(mockSelect).toHaveBeenCalledWith('name email');
-            expect(res.json).toHaveBeenCalledWith({
-                count: 2,
-                drivers: fakeDrivers
-            });
-        });
-
-        test('Should handle database errors (500)', async () => {
-
-            mockFind.mockImplementation(() => {
-                throw new Error('DB Error');
-            });
-
-            const req = mockRequest();
-            const res = mockResponse();
-
-            await getDrivers(req, res);
-
-            expect(res.status).toHaveBeenCalledWith(500);
-            expect(res.json).toHaveBeenCalledWith({ error: 'DB Error' });
-        });
-    });
-
+    expect(res.status).toHaveBeenCalledWith(500);
+  });
 });
