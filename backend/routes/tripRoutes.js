@@ -6,6 +6,7 @@ import {
   updateTrip,
   updateTripStatus,
   deleteTrip,
+  downloadTripPDF,
 } from "../controllers/tripController.js";
 import { validateTrip, validateTripStatus } from "../validators/tripValidator.js";
 import { validateRequest } from "../middleware/validateRequest.js";
@@ -21,6 +22,7 @@ router.put("/:id", checkRole("admin"), validateTrip, validateRequest, updateTrip
 router.delete("/:id", checkRole("admin"), deleteTrip);
 router.get("/", checkRole("admin"), getAllTrips);
 router.patch("/:id/status", checkRole("admin", "driver"), validateTripStatus, validateRequest, updateTripStatus);
+router.get("/:id/pdf", checkRole("driver"), downloadTripPDF);
 router.get("/my-trips", checkRole("driver"), getMyTrips);
 
 export default router;

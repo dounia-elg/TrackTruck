@@ -1,6 +1,7 @@
 import Trip from "../models/Trip.js";
 import User from "../models/User.js";
 import Truck from "../models/Truck.js";
+import { generateTripPDF } from "../utils/pdfGenerator.js";
 
 export const createTrip = async (req, res) => {
     try {
@@ -154,6 +155,31 @@ export const getMyTrips = async (req, res) => {
             count: trips.length,
             trips,
         });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+export const downloadTripPDF = async (req, res) => {
+    try {
+        const trip = await Trip.findById(req.params.id)
+            .populate("chauffeur", "name email")
+            .populate("camion", "immatriculation modele")
+            .populate("remorque", "immatriculation type");
+
+        if (!trip) {
+            return res.status(404).json({ error: "Trajet non trouvé" });
+        }
+
+        if (req.user.role === "driver" && trip.chauffeur._id.toString() !== req.user.id) {
+            return res.status(403).json({ error: "Accès non autorisé" });
+        }
+
+        const pdfBuffer = await generateTripPDF(trip);
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=ordre-mission-${trip._id}.pdf`);
+        res.send(pdfBuffer);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

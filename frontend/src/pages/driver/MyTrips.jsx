@@ -8,6 +8,7 @@ import {
   FaClock,
   FaPlay,
   FaCheckCircle,
+  FaDownload,
 } from "react-icons/fa";
 
 function MyTrips() {
@@ -88,6 +89,31 @@ function MyTrips() {
     } catch (error) {
       console.error("Erreur update:", error);
       alert("Erreur lors de la mise à jour");
+    }
+  };
+
+  const downloadTripPDF = async (tripId) => {
+    const token = localStorage.getItem("token");
+    try {
+      const response = await axios.get(
+        `http://localhost:3001/api/trips/${tripId}/pdf`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          responseType: 'blob',
+        }
+      );
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `ordre-mission-${tripId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Erreur téléchargement PDF:", error);
+      alert("Erreur lors du téléchargement du PDF");
     }
   };
 
@@ -256,6 +282,13 @@ function MyTrips() {
 
                   {/* Actions */}
                   <div className="flex gap-3">
+                    <button
+                      onClick={() => downloadTripPDF(trip._id)}
+                      className="bg-gray-600 text-white py-3 px-4 rounded-lg font-bold hover:bg-blue-700 transition flex items-center justify-center gap-2"
+                    >
+                      <FaDownload size={12} /> Télécharger PDF
+                    </button>
+
                     {(trip.statut === "à faire" ||
                       trip.statut === "planifié") && (
                       <button
