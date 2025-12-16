@@ -34,10 +34,10 @@ const truckSchema = new mongoose.Schema(
     },
     maintenanceRules: [
       {
-        type: { type: String, required: true }, 
-        intervalKm: { type: Number, required: true }, 
-        lastKm: { type: Number, default: 0 }, 
-        lastDate: { type: Date }, 
+        type: { type: String, required: true },
+        intervalKm: { type: Number, required: true },
+        lastKm: { type: Number, default: 0 },
+        lastDate: { type: Date },
       },
     ],
   },
